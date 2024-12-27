@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+    <h1>Welcome to My Corner</h1>
+</header>
+
+<section class="intro">
+    <p>test etst</p>
+</section>
+
+<section class="stats">
+    <div class="stat-box">
+        <h3>Posts Written</h3>
+        <p class="stat-number">{{ stats.posts }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Server Uptime</h3>
+        <p class="stat-number" id="uptime"></p>
+    </div>
+</section>
+
+<script>
+function formatUptime(bootTime) {
+    const now = Math.floor(Date.now() / 1000);
+    const uptime = now - bootTime;
+    const days = Math.floor(uptime / 86400);
+    const hours = Math.floor((uptime % 86400) / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
+    if (days === 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+    }
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
+// eslint-disable-next-line no-unused-vars
+function updateUptime() { 
+    // eslint-disable-next-line no-undef
+    const bootTime = {{ stats.uptime }};
+    // eslint-disable-next-line no-undef
+    document.getElementById('uptime').textContent = formatUptime(bootTime);
+}
+
+updateUptime();
+setInterval(updateUptime, 1000);
+</script>
+{% endblock %}

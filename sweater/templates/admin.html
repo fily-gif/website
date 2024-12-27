@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+    <h1>Admin Dashboard</h1>
+</header>
+
+<section class="admin-stats">
+    <div class="stat-box">
+        <h3>Comments</h3>
+        <p>Total: {{ stats.total_comments }}</p>
+        <p>Blocked IPs: {{ stats.blocked_ips }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Links</h3>
+        <p>Active Links: {{ stats.total_links }}</p>
+    </div>
+    <div class="stat-box">
+        <h3>Posts</h3>
+        <p>Total Posts: {{ stats.total_posts }}</p>
+    </div>
+</section>
+
+<section class="admin-comments">
+    <h2>Recent Comments</h2>
+    {% if all_comments %}
+        {% for comment in all_comments %}
+        <div class="admin-comment">
+            <div class="comment-header">
+                <strong>{{ comment.name }}</strong>&nbsp;on&nbsp;<a href="{{ url_for('post', blog_name=comment.post_id) }}">{{ comment.post_id }}</a>
+                <span class="comment-date">{{ comment.date }}</span>
+                <div class="mod-controls">
+                    <a href="javascript:void(0)" onclick="modAction('delete', '{{ comment.post_id }}', {{ comment.index }})" title="Delete comment">🗑️</a>
+                </div>
+            </div>
+            <div class="comment-content">{{ comment.content|escape }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No comments found.</p>
+    {% endif %}
+</section>
+
+<section class="blocked-ips">
+    <h2>Blocked IPs</h2>
+    {% if blocked_ips %}
+        <ul>
+        {% for ip in blocked_ips %}
+            <li>
+                {{ ip }}
+                <form method="POST" action="{{ url_for('unblock_ip', ip=ip) }}" style="display: inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="unblock-btn">Unblock</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No blocked IPs.</p>
+    {% endif %}
+</section>
+
+<section class="admin-links">
+    <h2>Admin Tools</h2>
+    <ul>
+        <li><a href="{{ url_for('manage_links', key='TEEEST') }}">Manage Short Links</a></li>
+        <li><a href="{{ url_for('posts') }}?key=TEEEST">Moderate Comments</a></li>
+    </ul>
+</section>
+
+<script>
+function modAction(action, postId, commentId) {
+    if (!confirm('Are you sure you want to perform this moderation action?')) {
+        return;
+    }
+    fetch(`/admin/moderate/${action}/${postId}/${commentId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrf_token]').value
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

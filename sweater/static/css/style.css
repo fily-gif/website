@@ -1,0 +1,403 @@
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #202020;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.intro {
+    background-color: #363636;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    text-align: center;
+}
+
+.stat-box {
+    background-color: #363636;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #727272;
+}
+
+* {
+	color: #ffffff;
+}
+
+.navbar {
+    background-color: #363636;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #727272;
+}
+
+.about, .posts, .files {
+    background-color: #363636;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.posts {
+    background-color: #363636;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.file-category {
+    margin-bottom: 1.5rem;
+}
+
+.file-category h2 {
+    color: #727272;
+    margin-bottom: 0.5rem;
+}
+
+.file-category ul {
+    list-style: none;
+    padding-left: 1rem;
+}
+
+.file-category li {
+    padding: 0.3rem 0;
+}
+
+.post-preview {
+    background-color: #2a2a2a;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.post-preview:not(:last-child) {
+    border-bottom: 1px solid #444;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.post-preview:hover {
+    transform: translateX(5px);
+}
+
+.post-preview h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.post-preview a {
+    text-decoration: none;
+    color: #fff;
+}
+
+.post-preview a:hover {
+    color: #727272;
+}
+
+.post-preview h2 {
+    margin: 0;
+    margin-bottom: 0.5rem;
+}
+
+.post-preview a {
+    text-decoration: none;
+}
+
+.post-category {
+    color: #727272;
+    font-size: 0.9rem;
+}
+
+.blog-post {
+    background-color: #363636;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.post-content {
+    margin: 2rem 0;
+}
+
+.post-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #444;
+}
+
+.post-filename {
+    color: #727272;
+    font-size: 0.8rem;
+    font-family: monospace;
+    margin-top: 0.5rem;
+}
+
+.links {
+    background-color: #363636;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.link-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group input {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background-color: #2a2a2a;
+}
+
+.message {
+    background-color: #2a2a2a;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    background-color: #727272;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #858585;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.admin-links {
+    margin: 2rem 0;
+}
+
+.admin-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.admin-links li {
+    margin: 0.5rem 0;
+}
+
+.admin-links a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+}
+
+.admin-links a:hover {
+    background: #e0e0e0;
+}
+
+.mod-controls {
+    display: inline-block;
+    margin-left: 1em;
+}
+
+.mod-controls a {
+    text-decoration: none;
+    margin-left: 0.5em;
+    cursor: pointer;
+}
+
+/* Comments Section */
+.comments {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #444;
+}
+
+.comment {
+    background-color: #2a2a2a;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #727272;
+}
+
+.comment-date {
+    margin-left: 1rem;
+    color: #555;
+}
+
+.comment-content {
+    line-height: 1.4;
+}
+
+/* Comment Form */
+.comment-form {
+    margin-top: 2rem;
+}
+
+.comment-form textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    margin-bottom: 1rem;
+    resize: vertical;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background-color: #442222;
+    border: 1px solid #662222;
+    color: #ff9999;
+}
+
+.alert-success {
+    background-color: #224422;
+    border: 1px solid #226622;
+    color: #99ff99;
+}
+
+/* Moderation Controls */
+.mod-controls {
+    margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mod-controls a {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.mod-controls a:hover {
+    background-color: #363636;
+}
+
+.admin-comments, .blocked-ips {
+    background-color: #363636;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.admin-comment {
+    background-color: #2a2a2a;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.blocked-ips ul {
+    list-style: none;
+    padding: 0;
+}
+
+.blocked-ips li {
+    background-color: #2a2a2a;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.unblock-btn {
+    background-color: #442222;
+    color: #ffffff;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.unblock-btn:hover {
+    background-color: #661111;
+}

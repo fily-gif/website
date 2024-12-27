@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="blog-post">
+    <header>
+        <h1>{{ post.title|escape }}</h1>
+    </header>
+
+    <div class="post-content">
+        {{ post.content|safe }}
+    </div>
+
+    <section class="comments">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h3>Comments</h3>
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="comment" id="comment-{{ loop.index0 }}">
+                <div class="comment-header">
+                    <span class="comment-author">{{ comment.name }}</span>
+                    <span class="comment-date">{{ comment.date }}</span>
+                    {% if request.cookies.get('admin_token') %}
+                    <div class="mod-controls">
+                        <a href="javascript:void(0)" onclick="modAction('delete', {{ loop.index0 }})" title="Delete comment">
+                            🗑️
+                        </a>
+                        <a href="javascript:void(0)" onclick="modAction('block', {{ loop.index0 }})" title="Block IP">
+                            🚫
+                        </a>
+                        <a href="javascript:void(0)" onclick="modAction('both', {{ loop.index0 }})" title="Delete & Block">
+                            ⛔
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="comment-content">{{ comment.content|escape }}</div>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('add_comment', blog_name=post.filename) }}" class="comment-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <textarea name="content" required placeholder="Add a comment..." maxlength="500"></textarea>
+            <button type="submit">Post Comment</button>
+        </form>
+    </section>
+
+    <script>
+    function modAction(action, commentId) {
+        if (!confirm('Are you sure you want to perform this moderation action?')) {
+            return;
+        }
+        fetch(`/admin/moderate/${action}/{{ post.filename }}/${commentId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrf_token]').value
+            }
+        }).then(response => {
+            if (response.ok) {
+                if (action === 'delete' || action === 'both') {
+                    document.getElementById(`comment-${commentId}`).remove();
+                }
+            }
+        });
+    }
+    </script>
+
+    <footer class="post-footer">
+        <a href="/posts">&larr; Back to posts</a>
+    </footer>
+</article>
+{% endblock %}
