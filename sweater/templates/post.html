@@ -60,8 +60,8 @@
         fetch(`/admin/moderate/${action}/{{ post.filename }}/${commentId}`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrf_token]').value
-            }
+                'X-CSRFToken': document.querySelector('[name=csrf_token]').value,
+                'Authorization': document.cookie.get('admin_token')
         }).then(response => {
             if (response.ok) {
                 if (action === 'delete' || action === 'both') {
