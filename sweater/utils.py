@@ -79,7 +79,7 @@ class Content:
     
     def get_stats(self):
         return {
-            'posts': len(self.blogs),
+            'posts': len(self.blogs) if self.blogs else 0,
             'uptime': psutil.boot_time()
         }
     
