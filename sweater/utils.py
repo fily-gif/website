@@ -90,20 +90,22 @@ class Content:
     
     def get_posts(self):
         posts = []
-        for blog_name in self.blogs:
-            post_path = os.path.join(self.root, blog_name, f"{blog_name}.md")
-            with open(post_path, 'r') as f:
-                content = f.read()
-            title = self._extract_title(content) or blog_name
-            html = markdown.markdown(content)
-            posts.append({
-                'filename': blog_name,
-                'title': title,
-                'path': f'/post/{blog_name}',
-                'content': html
-            })
-        return posts
-    
+        if self.blogs:
+            for blog_name in self.blogs:
+                post_path = os.path.join(self.root, blog_name, f"{blog_name}.md")
+                with open(post_path, 'r') as f:
+                    content = f.read()
+                title = self._extract_title(content) or blog_name
+                html = markdown.markdown(content)
+                posts.append({
+                    'filename': blog_name,
+                    'title': title,
+                    'path': f'/post/{blog_name}',
+                    'content': html
+                })
+            return posts
+        return None
+
     def get_post(self, blog_name):
         post_path = os.path.join(self.root, blog_name, f"{blog_name}.md")
         if os.path.exists(post_path):
