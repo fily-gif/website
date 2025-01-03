@@ -3,6 +3,12 @@
 {% block content %}
 <header>
     <h1>Blog Posts</h1>
+    {% if admin %}
+    <div class="admin-controls">
+        <a href="{{ url_for('write_post') }}" class="button">Write New Post</a>
+        <a href="{{ url_for('upload_post') }}" class="button">Upload Post</a>
+    </div>
+    {% endif %}
 </header>
 
 <section class="posts">

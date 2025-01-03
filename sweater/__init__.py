@@ -22,7 +22,8 @@ def index():
 
 @app.route('/posts')
 def posts():
-    return render_template('posts.html', posts=content_manager.get_posts())
+    is_admin = request.cookies.get('admin_token') == utils.get_key()
+    return render_template('posts.html', posts=content_manager.get_posts(), admin=is_admin)
 
 @app.route('/post/<blog_name>')
 def post(blog_name):
@@ -58,9 +59,9 @@ def short_link(short_id):
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        if request.form.get('password') == 'TEEEST':  # In production, use proper authentication
+        if request.form.get('password') == utils.get_key():  # In production, use proper authentication
             response = redirect(request.args.get('next', url_for('admin')))
-            response.set_cookie('admin_token', 'TEEEST', httponly=True, secure=True)
+            response.set_cookie('admin_token', utils.get_key(), httponly=True, secure=True)
             return response
         flash('Invalid password', 'error')
     return render_template('admin_login.html')
@@ -114,3 +115,41 @@ def unblock_ip(ip):
     comments_manager.unblock_ip(ip)
     flash('IP unblocked successfully', 'success')
     return redirect(url_for('admin'))
+
+@app.route('/admin/write', methods=['GET', 'POST'])
+@utils.requires_auth
+def write_post():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        folder_name = request.form.get('folder_name')
+        if title and content:
+            success = content_manager.create_post(title, content, folder_name)
+            if success:
+                flash('Post created successfully', 'success')
+                return redirect(url_for('posts'))
+            flash('Error creating post', 'error')
+    return render_template('write_post.html')
+
+@app.route('/admin/upload', methods=['GET', 'POST'])
+@utils.requires_auth
+def upload_post():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        folder_name = request.form.get('folder_name')
+        
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+            
+        if file and file.filename.endswith('.md'):
+            success = content_manager.upload_post(file, folder_name)
+            if success:
+                flash('Post uploaded successfully', 'success')
+                return redirect(url_for('posts'))
+            flash('Error uploading post', 'error')
+    return render_template('upload_post.html')

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+    <h1>Write New Post</h1>
+</header>
+
+<form method="POST" class="write-post-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" required>
+    </div>
+    <div class="form-group">
+        <label for="folder_name">Folder Name (optional)</label>
+        <input type="text" id="folder_name" name="folder_name" placeholder="e.g., 01-my-post">
+        <small>Leave empty for auto-generated name</small>
+    </div>
+    <div class="form-group">
+        <label for="content">Content (Markdown)</label>
+        <textarea id="content" name="content" rows="20" required></textarea>
+    </div>
+    <button type="submit" class="button">Create Post</button>
+</form>
+{% endblock %}

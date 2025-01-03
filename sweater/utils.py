@@ -15,12 +15,15 @@ import time
 
 fake = Faker('en_US')
 
+def get_key():
+    return 'TH1is1s4n)t4ctu4!!y4s3cur#t0k3n'
+
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.cookies.get('admin_token')
-        if not auth or auth != 'TEEEST':  # In production, use a secure hash/token
-            return redirect(url_for('admin_login', next=request.url))
+        if not auth or auth != get_key():
+            return "Go away." # redirect(url_for('admin_login', next=request.url))
         return f(*args, **kwargs)
     return decorated
 
@@ -123,6 +126,64 @@ class Content:
                 'content': markdown.markdown(content)
             }
         return None
+
+    def _get_next_number(self):
+        """Get the next available number for post folder"""
+        numbers = []
+        for blog_dir in os.listdir(self.root):
+            try:
+                num = int(blog_dir.split('-')[0])
+                numbers.append(num)
+            except (ValueError, IndexError):
+                continue
+        return max(numbers, default=0) + 1
+
+    def create_post(self, title, content, custom_name=None):
+        try:
+            if custom_name:
+                folder_name = custom_name
+            else:
+                # Create slug from title
+                slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+                next_num = self._get_next_number()
+                folder_name = f"{next_num:02d}-{slug}"
+            
+            post_dir = os.path.join(self.root, folder_name)
+            os.makedirs(post_dir, exist_ok=True)
+            
+            # Add title as h1 if not present
+            if not content.startswith('# '):
+                content = f"# {title}\n\n{content}"
+            
+            with open(os.path.join(post_dir, f"{folder_name}.md"), 'w') as f:
+                f.write(content)
+            
+            if folder_name not in self.blogs:
+                self.blogs.append(folder_name)
+            return True
+        except Exception:
+            return False
+    
+    def upload_post(self, file, custom_name=None):
+        try:
+            if custom_name:
+                folder_name = custom_name
+            else:
+                filename = file.filename
+                slug = os.path.splitext(filename)[0]
+                next_num = self._get_next_number()
+                folder_name = f"{next_num:02d}-{slug}"
+            
+            post_dir = os.path.join(self.root, folder_name)
+            os.makedirs(post_dir, exist_ok=True)
+            
+            file.save(os.path.join(post_dir, f"{folder_name}.md"))
+            
+            if folder_name not in self.blogs:
+                self.blogs.append(folder_name)
+            return True
+        except Exception:
+            return False
 
 class Comments:
     def __init__(self):
