@@ -78,8 +78,13 @@ class Content:
         return None
     
     def get_stats(self):
+        try:
+            post_count = len(self.blogs)
+        except AttributeError:
+            post_count = 0
+        
         return {
-            'posts': len(self.blogs) if self.blogs else 0,
+            'posts': post_count,
             'uptime': psutil.boot_time()
         }
     
