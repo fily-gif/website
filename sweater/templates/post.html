@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 
+{% block head %}
+<!-- Discord Embed Meta Tags -->
+<meta property="og:title" content="{{ meta.title }}">
+<meta property="og:type" content="{{ meta.type }}">
+<meta property="og:description" content="{{ meta.description }}">
+<meta property="og:url" content="{{ meta.url }}">
+<meta name="theme-color" content="#FF5733">
+{% endblock %}
+
 {% block content %}
 <article class="blog-post">
     <header>

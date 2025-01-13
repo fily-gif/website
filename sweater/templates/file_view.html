@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block head %}
+<meta property="og:title" content="{{ meta.title }}">
+<meta property="og:type" content="{{ meta.type }}">
+<meta property="og:url" content="{{ meta.url }}">
+{% if meta.image %}
+<meta property="og:image" content="{{ meta.url }}">
+{% endif %}
+<meta name="theme-color" content="#FF5733">
+{% endblock %}
+
+{% block content %}
+<div class="file-viewer">
+    <h1>{{ meta.title }}</h1>
+    {% if meta.type == 'image' %}
+        <img src="{{ url_for('raw_file', filename=filename) }}" alt="{{ meta.title }}">
+    {% else %}
+        <p>
+            <a href="{{ url_for('raw_file', filename=filename) }}" class="download-link">
+                Download {{ meta.title }}
+            </a>
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

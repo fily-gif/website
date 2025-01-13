@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+    <h1>File Upload</h1>
+</header>
+
+<section class="upload">
+    {% if message %}
+    <div class="message">{{ message }}</div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="upload-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="form-group">
+            <label for="file">Select file:</label>
+            <input type="file" id="file" name="file" required>
+        </div>
+        <div class="form-group">
+            <label for="custom_path">Custom path (optional):</label>
+            <input type="text" id="custom_path" name="custom_path" placeholder="e.g., images/profile.jpg">
+            <small class="help-text">Leave empty for auto-generated path</small>
+        </div>
+        <button type="submit">Upload</button>
+    </form>
+</section>
+{% endblock %}
