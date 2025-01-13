@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = os.urandom(32)  # Required for CSRF
 csrf = CSRFProtect(app)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'md'}
 
 # Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -39,7 +39,7 @@ def sanitize_path(filename):
 def get_file_type(filename):
     """Determine if file is an image or other type"""
     ext = filename.rsplit('.', 1)[1].lower()
-    return 'image' if ext in {'png', 'jpg', 'jpeg', 'gif'} else 'article'
+    return 'image' if ext in {'png', 'jpg', 'jpeg', 'gif'} else 'article' if ext == 'md' else 'file'
 
 content_manager = utils.Content()
 link_shortener = utils.LinkShortener()
