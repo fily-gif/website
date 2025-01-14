@@ -4,10 +4,10 @@
 <meta property="og:title" content="{{ meta.title }}">
 <meta property="og:type" content="{{ meta.type }}">
 <meta property="og:url" content="{{ meta.url }}">
-{% if meta.image %}
+{% if meta.type == 'image' %}
 <meta property="og:image" content="{{ meta.url }}">
 {% endif %}
-<!-- <meta name="theme-color" content="#FF5733"> -->
+<meta name="theme-color" content="#FF5733">
 {% endblock %}
 
 {% block content %}
@@ -22,5 +22,6 @@
             </a>
         </p>
     {% endif %}
+    <p class="file-path">Path: {{ filename }}</p>
 </div>
 {% endblock %}

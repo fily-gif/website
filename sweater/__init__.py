@@ -209,22 +209,20 @@ def upload_file():
             filename = secure_filename(file.filename)
             
             if custom_path:
+                # Sanitize and create full path
                 custom_path = sanitize_path(custom_path)
-                if not is_safe_path(custom_path):
-                    flash('Invalid custom path', 'error')
-                    return redirect(request.url)
-                    
                 # Create directories if they don't exist
-                save_path = os.path.join(UPLOAD_FOLDER, os.path.dirname(custom_path))
-                os.makedirs(save_path, exist_ok=True)
-                
-                full_path = os.path.join(UPLOAD_FOLDER, custom_path)
+                full_dir = os.path.join(UPLOAD_FOLDER, os.path.dirname(custom_path))
+                os.makedirs(full_dir, exist_ok=True)
+                # Save file
+                file.save(os.path.join(UPLOAD_FOLDER, custom_path))
+                saved_path = custom_path
             else:
-                full_path = os.path.join(UPLOAD_FOLDER, filename)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                saved_path = filename
             
-            file.save(full_path)
             flash('File successfully uploaded', 'success')
-            return redirect(url_for('admin'))
+            return redirect(url_for('uploaded_file', filename=saved_path))
             
         flash('File type not allowed', 'error')
         return redirect(request.url)
@@ -245,12 +243,11 @@ def uploaded_file(filename):
     meta = {
         'title': filename,
         'type': get_file_type(filename),
-        'url': file_url,
-        'image': file_url if get_file_type(filename) == 'image' else None
+        'url': file_url
     }
     return render_template('file_view.html', meta=meta, filename=filename)
 
 @app.route('/raw-file/<path:filename>')
 def raw_file(filename):
-    """Serve the raw file"""
+    """Serve the raw file directly from the uploads folder"""
     return send_from_directory(UPLOAD_FOLDER, filename)
