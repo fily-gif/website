@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ meta.title }}</title>
+    <meta property="og:title" content="{{ meta.title }}">
+    <meta property="og:type" content="{{ meta.type }}">
+    <meta property="og:url" content="{{ meta.url }}">
+    {% if meta.image %}
+    <meta property="og:image" content="{{ meta.image }}">
+    {% endif %}
+    <meta name="theme-color" content="#FF5733">
+</head>
+<body>
+    <p>Redirecting to file...</p>
+    <script>window.location.href = "{{ meta.url }}";</script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from flask_wtf.csrf import CSRFProtect
 from sweater import utils
+from werkzeug.utils import secure_filename
+import re
+from pathlib import Path
 
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
@@ -11,6 +14,32 @@ app = Flask(__name__,
            static_folder=static_dir)
 app.config['SECRET_KEY'] = os.urandom(32)  # Required for CSRF
 csrf = CSRFProtect(app)
+
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'md'}
+
+# Create uploads directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_safe_path(path):
+    """Check if the path is safe (no directory traversal)"""
+    return not (('..' in path) or ('/' in path) or ('\\' in path))
+
+def sanitize_path(filename):
+    """Sanitize the custom path"""
+    # Remove any leading/trailing slashes and spaces
+    filename = filename.strip('/ ').replace('\\', '/')
+    # Replace multiple slashes with single slash
+    filename = re.sub(r'/+', '/', filename)
+    return filename
+
+def get_file_type(filename):
+    """Determine if file is an image or other type"""
+    ext = filename.rsplit('.', 1)[1].lower()
+    return 'image' if ext in {'png', 'jpg', 'jpeg', 'gif'} else 'article' if ext == 'md' else 'file'
 
 content_manager = utils.Content()
 link_shortener = utils.LinkShortener()
@@ -30,7 +59,14 @@ def post(blog_name):
     post = content_manager.get_post(blog_name)
     if post:
         comments = comments_manager.get_comments(blog_name)
-        return render_template('post.html', post=post, comments=comments)
+        # Add meta tags for Discord embed
+        meta = {
+            'title': post['title'],
+            'type': 'article',
+            'description': post['content'][:200] + '...' if len(post['content']) > 200 else post['content'],
+            'url': request.url
+        }
+        return render_template('post.html', post=post, comments=comments, meta=meta)
     return "Post not found", 404
 
 @app.route('/post/<blog_name>/comment', methods=['POST'])
@@ -103,7 +139,7 @@ def admin():
         'total_comments': comments_manager.get_stats()['total'],
         'blocked_ips': comments_manager.get_stats()['blocked_ips'],
         'total_links': link_shortener.get_stats(),
-        'total_posts': len(content_manager.blogs)
+        'total_posts': len(content_manager.blogs) if content_manager.blogs else 0
     }
     all_comments = comments_manager.get_all_comments()
     blocked_ips = comments_manager.blacklist.get('ips', [])
@@ -154,8 +190,74 @@ def upload_post():
             flash('Error uploading post', 'error')
     return render_template('upload_post.html')
 
-@app.route('/admin/api/git/pull', methods=['GET'])
+@app.route('/admin/upload-file', methods=['GET', 'POST'])
 @utils.requires_auth
-def git_pull():
-    utils.git_pull()
-    return redirect(url_for('admin'))
+def upload_file():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        custom_path = request.form.get('custom_path', '').strip()
+        
+        if file.filename == '':
+            flash('No selected file', 'error')
+            return redirect(request.url)
+            
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            
+            if custom_path:
+                # Sanitize and create full path
+                custom_path = sanitize_path(custom_path)
+                # Create directories if they don't exist
+                full_dir = os.path.join(UPLOAD_FOLDER, os.path.dirname(custom_path))
+                os.makedirs(full_dir, exist_ok=True)
+                # Save file
+                file.save(os.path.join(UPLOAD_FOLDER, custom_path))
+                saved_path = custom_path
+            else:
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                saved_path = filename
+            
+            flash('File successfully uploaded', 'success')
+            return redirect(url_for('uploaded_file', filename=saved_path))
+            
+        flash('File type not allowed', 'error')
+        return redirect(request.url)
+    
+    # For GET requests, show list of uploaded files
+    files = []
+    for root, dirs, filenames in os.walk(UPLOAD_FOLDER):
+        for filename in filenames:
+            rel_path = os.path.relpath(os.path.join(root, filename), UPLOAD_FOLDER)
+            files.append(rel_path)
+            
+    return render_template('upload.html', files=files)
+
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    """View file page with meta tags and proper display"""
+    file_url = url_for('raw_file', filename=filename, _external=True)
+    meta = {
+        'title': filename,
+        'type': get_file_type(filename),
+        'url': file_url
+    }
+    return render_template('file_view.html', meta=meta, filename=filename)
+
+@app.route('/raw-file/<path:filename>')
+def raw_file(filename):
+    """Serve the raw file directly from the uploads folder"""
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
+@app.route('/admin/list-files')
+@utils.requires_auth
+def list_files():
+    files = []
+    for root, dirs, filenames in os.walk(UPLOAD_FOLDER):
+        for filename in filenames:
+            rel_path = os.path.relpath(os.path.join(root, filename), UPLOAD_FOLDER)
+            files.append(rel_path)
+    return render_template('list_files.html', files=files)

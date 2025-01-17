@@ -66,8 +66,8 @@ class Content:
     root = os.path.join(os.path.dirname(__file__), "static/md")
     
     def __init__(self):
+        self.blogs = []
         if os.path.exists(self.root):
-            self.blogs = []
             for blog_dir in os.listdir(self.root):
                 dir_path = os.path.join(self.root, blog_dir)
                 if os.path.isdir(dir_path):

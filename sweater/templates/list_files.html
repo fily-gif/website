@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+    <h1>File Manager</h1>
+</header>
+
+<section class="file-browser">
+    <div class="file-list">
+        {% for file in files %}
+        <div class="file-item">
+            <div class="file-info">
+                {% if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+                    <span class="file-icon">🖼️</span>
+                {% elif file.lower().endswith('.zip') %}
+                    <span class="file-icon">📦</span>
+                {% elif file.lower().endswith('.pdf') %}
+                    <span class="file-icon">📄</span>
+                {% elif file.lower().endswith('.md') %}
+                    <span class="file-icon">📝</span>
+                {% else %}
+                    <span class="file-icon">📎</span>
+                {% endif %}
+                <a href="{{ url_for('uploaded_file', filename=file) }}" class="file-name">{{ file }}</a>
+            </div>
+            <div class="file-actions">
+                <a href="{{ url_for('raw_file', filename=file) }}" title="Download" class="file-action" target="_blank">💾</a>
+            </div>
+        </div>
+        {% else %}
+        <p>No files found.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
