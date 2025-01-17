@@ -27,6 +27,9 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
+def git_pull():
+    os.system('git pull')
+
 class LinkShortener:
     def __init__(self):
         self.links_file = os.path.join(os.path.dirname(__file__), "static/links.json")

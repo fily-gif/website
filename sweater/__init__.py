@@ -153,3 +153,9 @@ def upload_post():
                 return redirect(url_for('posts'))
             flash('Error uploading post', 'error')
     return render_template('upload_post.html')
+
+@app.route('/admin/api/git/pull', methods=['GET'])
+@utils.requires_auth
+def git_pull():
+    utils.git_pull()
+    return redirect(url_for('admin'))

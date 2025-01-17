@@ -1,3 +1,13 @@
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0000, 0 0 40px #ff0000, 0 0 50px #ff0000, 0 0 60px #ff0000, 0 0 70px #ff0000;
+    }
+
+    to {
+        text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #fff, 0 0 50px #fff, 0 0 60px #fff, 0 0 70px #fff;
+    }
+}
+
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
@@ -6,9 +16,35 @@ body {
     background-color: #202020;
 }
 
+.little {
+    font-size: 0.4rem;
+}
+
+.icon-bsky{
+    filter: invert(41%) sepia(47%) saturate(4645%) hue-rotate(195deg) brightness(98%) contrast(97%);
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.2rem;
+}
+.icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.2rem;
+}
+
+.am-link {
+    color: #00b7ff;
+}
+
+.am-link:visited {
+    color: #a9dcfd;
+}
+
 .personal-space {
-    /* padding: 2rem; */
-    color: #FF0000 !important;
+    font-size: 20px;
+    color: #fff;
+    text-align: center;
+    animation: glow 1s ease-in-out infinite alternate;
 }
 
 .container {
