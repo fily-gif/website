@@ -143,7 +143,8 @@ def admin():
     }
     all_comments = comments_manager.get_all_comments()
     blocked_ips = comments_manager.blacklist.get('ips', [])
-    return render_template('admin.html', stats=stats, all_comments=all_comments, blocked_ips=blocked_ips)
+    password = utils.get_key()
+    return render_template('admin.html', stats=stats, all_comments=all_comments, blocked_ips=blocked_ips, password=password)
 
 @app.route('/admin/unblock/<ip>', methods=['POST'])
 @utils.requires_auth
