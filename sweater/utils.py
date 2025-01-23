@@ -16,7 +16,7 @@ import time
 fake = Faker('en_US')
 
 def get_key():
-    return 'TH1is1s4n)t4ctu4!!y4s3cur#t0k3n'
+    return 'Correct cat HORSE candle'
 
 def requires_auth(f):
     @wraps(f)

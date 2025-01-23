@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from flask_wtf.csrf import CSRFProtect
 from sweater import utils
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException
 import re
 from pathlib import Path
 
@@ -44,6 +45,10 @@ def get_file_type(filename):
 content_manager = utils.Content()
 link_shortener = utils.LinkShortener()
 comments_manager = utils.Comments()
+
+@app.errorhandler(HTTPException) # dynamic error page
+def error(e):
+    return render_template('error.html', status_code=e), e.code
 
 @app.route('/')
 def index():
