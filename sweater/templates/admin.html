@@ -63,9 +63,8 @@
 <section class="admin-links">
     <h2>Admin Tools</h2>
     <ul>
-        <li><a href="{{ url_for('manage_links', key='TEEEST') }}">Manage Short Links</a></li>
-        <li><a href="{{ url_for('posts') }}?key=TEEEST">Moderate Comments</a></li>
-        <li><a href="{{ url_for('upload_file') }}">Upload Files</a></li>
+        <li><a href="{{ url_for('manage_links', key=password) }}">Manage Short Links</a></li>
+        <li><a href="{{ url_for('posts') }}?key={{ password }}">Moderate Comments</a></li>
     </ul>
 </section>
 

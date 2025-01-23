@@ -148,7 +148,8 @@ def admin():
     }
     all_comments = comments_manager.get_all_comments()
     blocked_ips = comments_manager.blacklist.get('ips', [])
-    return render_template('admin.html', stats=stats, all_comments=all_comments, blocked_ips=blocked_ips)
+    password = utils.get_key()
+    return render_template('admin.html', stats=stats, all_comments=all_comments, blocked_ips=blocked_ips, password=password)
 
 @app.route('/admin/unblock/<ip>', methods=['POST'])
 @utils.requires_auth
@@ -256,3 +257,13 @@ def uploaded_file(filename):
 def raw_file(filename):
     """Serve the raw file directly from the uploads folder"""
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+@app.route('/admin/list-files')
+@utils.requires_auth
+def list_files():
+    files = []
+    for root, dirs, filenames in os.walk(UPLOAD_FOLDER):
+        for filename in filenames:
+            rel_path = os.path.relpath(os.path.join(root, filename), UPLOAD_FOLDER)
+            files.append(rel_path)
+    return render_template('list_files.html', files=files)

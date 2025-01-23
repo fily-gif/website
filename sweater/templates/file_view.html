@@ -1,27 +1,51 @@
 {% extends "base.html" %}
 
-{% block head %}
-<meta property="og:title" content="{{ meta.title }}">
+{% block meta %}
+<meta property="og:title" content="{{ filename }}">
 <meta property="og:type" content="{{ meta.type }}">
 <meta property="og:url" content="{{ meta.url }}">
 {% if meta.type == 'image' %}
 <meta property="og:image" content="{{ meta.url }}">
 {% endif %}
-<meta name="theme-color" content="#FF5733">
+
+<meta name="twitter:card" content="{% if meta.type == 'image' %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ filename }}">
+<meta name="twitter:url" content="{{ meta.url }}">
+{% if meta.type == 'image' %}
+<meta name="twitter:image" content="{{ meta.url }}">
+{% endif %}
+
+<meta name="description" content="File: {{ filename }}">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="{{ meta.url }}">
 {% endblock %}
 
 {% block content %}
-<div class="file-viewer">
-    <h1>{{ meta.title }}</h1>
-    {% if meta.type == 'image' %}
-        <img src="{{ url_for('raw_file', filename=filename) }}" alt="{{ meta.title }}">
-    {% else %}
-        <p>
-            <a href="{{ url_for('raw_file', filename=filename) }}" class="download-link">
-                Download {{ meta.title }}
-            </a>
-        </p>
-    {% endif %}
-    <p class="file-path">Path: {{ filename }}</p>
-</div>
+<header>
+    <h1>{{ filename }}</h1>
+</header>
+
+<section class="file-viewer">
+    <div class="file-actions">
+        <a href="{{ url_for('raw_file', filename=filename) }}" class="button" target="_blank">Download Raw File</a>
+        <a href="{{ url_for('list_files') }}" class="button">Back to Files</a>
+    </div>
+
+    <div class="file-preview">
+        {% if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+            <img src="{{ url_for('raw_file', filename=filename) }}" alt="{{ filename }}">
+        {% elif filename.lower().endswith('.md') %}
+            <div class="markdown-preview">
+                <!-- Markdown content would be rendered here if you want to add it -->
+                <a href="{{ url_for('raw_file', filename=filename) }}">View Raw Markdown</a>
+            </div>
+        {% else %}
+            <div class="generic-file">
+                <p>This file type cannot be previewed directly.</p>
+                <p>Click the download button above to access the file.</p>
+                <p class="file-info">Filename: {{ filename }}</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
 {% endblock %}
