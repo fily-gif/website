@@ -18,7 +18,7 @@
     <div class="post-content">
         {{ post.content|safe }}
     </div>
-
+    <hr>
     <section class="comments">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -27,7 +27,6 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-
         <h3>Comments</h3>
         {% if comments %}
             {% for comment in comments %}
@@ -53,11 +52,10 @@
             </div>
             {% endfor %}
         {% endif %}
-
         <form method="POST" action="{{ url_for('add_comment', blog_name=post.filename) }}" class="comment-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <textarea name="content" required placeholder="Add a comment..." maxlength="500"></textarea>
-            <button type="submit">Post Comment</button>
+            <textarea class="comment-textarea" name="content" required placeholder="Add a comment..." maxlength="500"></textarea>
+            <button class="comment-button" type="submit">Post Comment</button>
         </form>
     </section>
 
