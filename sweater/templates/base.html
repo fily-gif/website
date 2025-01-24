@@ -11,12 +11,16 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/" class="nav-brand">Home</a>
             <div class="nav-links">
-                <a href="/posts">Posts</a>
-                <a href="/about">About</a>
+                <a href="/">cd ~</a>
+                <br>
+                <a href="/posts">cd ~/posts.html</a>
+                <br>
+                <a href="/about">cd ~/about.html</a>
+                
                 {% if request.cookies.get('admin_token') %}
                     <a href="/admin">Admin</a>
+                    <br>
                     <a href="/admin/logout">Logout</a>
                 {% endif %}
             </div>

@@ -6,4 +6,4 @@ app.wsgi_app = ProxyFix(
 )
 wsgi_app = app.wsgi_app
 if __name__ == '__main__':
-    app.run(debug=False, port=5005)
+    app.run(debug=True, port=5005)
