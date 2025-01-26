@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
 from flask_wtf.csrf import CSRFProtect
 from sweater import utils
 from werkzeug.utils import secure_filename
@@ -48,7 +48,7 @@ comments_manager = utils.Comments()
 
 @app.errorhandler(HTTPException) # dynamic error page
 def error(e):
-    return render_template('error.html', status_code=e), e.code
+    return render_template('error.html', status_code=e.code)
 
 @app.route('/')
 def index():
@@ -261,9 +261,42 @@ def raw_file(filename):
 @app.route('/admin/list-files')
 @utils.requires_auth
 def list_files():
+    print('listing files')
     files = []
     for root, dirs, filenames in os.walk(UPLOAD_FOLDER):
         for filename in filenames:
             rel_path = os.path.relpath(os.path.join(root, filename), UPLOAD_FOLDER)
             files.append(rel_path)
     return render_template('list_files.html', files=files)
+
+@app.route('/admin/git/pull')
+@utils.requires_auth
+def git_pull():
+    try:
+        utils.git_pull()
+        flash('Git pull successful', 'success')
+    except Exception as e:
+        flash(f'Error during git pull: {e}', 'error')
+    return redirect(url_for('admin'))
+
+"""@app.route('/admin/exec_python', methods=['POST'])
+@utils.requires_auth
+def exec_python(code=None):
+    print('got the request!')
+    code = request.cookies.get('code')
+    print(code)
+    if code:
+        try:
+            print('executing code!')
+            result = exec(code)
+            crafted = {
+                'result': result,
+                'type': type(result).__name__,
+                'code': code
+            }
+            print(crafted)
+            flash('Code executed successfully', 'success')
+            return result
+        except Exception as e:
+            flash(f'Error executing code: {e}', 'error')
+    return redirect(url_for('admin'))"""
