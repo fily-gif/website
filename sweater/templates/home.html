@@ -2,32 +2,34 @@
 
 {% block content %}
 <header>
-    <h1>Welcome to My Corner</h1>
+    <h1>fily@home:~$ cat stats</h1>
 </header>
-
-<section class="intro">
-    <p class="personal-space">WARNING: THIS IS A PERSONAL SPACE. YOU HAVE BEEN WARNED.</p>
-</section>
 
 <section class="stats">
     <div class="stat-box">
-        <h3>Posts Written</h3>
-        <p class="stat-number">{{ stats.posts }}</p>
+        <pre>
+Posts......: {{ stats.posts }}
+Uptime.....: <span id="uptime"></span>
+        </pre>
     </div>
     <div class="stat-box">
-        <h3>Links:</h3>
-        <img class="icon-bsky" src="{{ url_for('static', filename='img/bluesky-solid.svg') }}"><a href="https://bsky.app/profile/fily-is.plonk.ing" target="_blank">Bluesky</a></img><br>
-        <img class="icon" src="{{ url_for('static', filename='img/speedruncom.png') }}"><a href="https://www.speedrun.com/users/fily" target="_blank">Speedrun.com</a></img><br>
-        <img class="icon" src="{{ url_for('static', filename='img/tetrio-color.svg') }}"><a href="https://ch.tetr.io/u/fily" target="_blank">TETR.IO</a></img><br>
-        <img class="icon" src="{{ url_for('static', filename='img/GitHub_Invertocat_Light.svg') }}"><a href="https://github.com/fily-gif" target="_blank">GitHub</a></img>
+        <h3>contacts</h3>
+        <pre>
+<img class="icon-bsky" src="{{ url_for('static', filename='img/bluesky-solid.svg') }}"><a href="https://bsky.app/profile/fily-is.plonk.ing">bluesky</a>
+<img class="icon" src="{{ url_for('static', filename='img/speedruncom.png') }}"><a href="https://www.speedrun.com/users/fily">speedrun.com</a>
+<img class="icon" src="{{ url_for('static', filename='img/tetrio-color.svg') }}"><a href="https://ch.tetr.io/u/fily">tetr.io</a>
+<img class="icon" src="{{ url_for('static', filename='img/GitHub_Invertocat_Light.svg') }}"><a href="https://github.com/fily-gif">github</a>
+        </pre>
     </div>
+
     <div class="stat-box">
-        <h3>Server Uptime</h3>
-        <p class="stat-number" id="uptime"></p>
-    </div>
-    <div class="wiiide-stat-box">
-        <a href="https://discord.com/users/831530536781873163"><iframe src="https://lanyard.cnrad.dev/api/831530536781873163" width="100%" height="100%" frameBorder="0"></iframe></a>
-        <p class="text-medium">(Thanks <a href="https://github.com/phineas/lanyard">lanyard</a> for the API && <a href="https://github.com/cnrad/lanyard-profile-readme">lanyard-profile-readme</a> for the web-interface-thingy!)</p>
+        <h3>discord_status</h3>
+        <a href="https://discord.com/users/831530536781873163">
+            <iframe src="https://lanyard.cnrad.dev/api/831530536781873163?borderRadius=0px&idleMessage=probably%20sleeping%20or%20something&bg=00000000" frameBorder="0"></iframe>
+        </a>
+        <pre>
+source: <a href="https://github.com/phineas/lanyard">lanyard</a> + <a href="https://github.com/cnrad/lanyard-profile-readme">lanyard-profile-readme</a>
+        </pre>
     </div>
 </section>
 
@@ -45,11 +47,8 @@ function formatUptime(bootTime) {
     return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-// eslint-disable-next-line no-unused-vars
 function updateUptime() { 
-    // eslint-disable-next-line no-undef
     const bootTime = {{ stats.uptime }};
-    // eslint-disable-next-line no-undef
     document.getElementById('uptime').textContent = formatUptime(bootTime);
 }
 

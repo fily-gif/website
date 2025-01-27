@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %}</title>
-    {% block head %}{% endblock %}
-    <title>fily!</title>
+    <title>fily@home:~$</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-links">
                 <a href="/">cd ~</a>
-                <br>
-                <a href="/posts">cd ~/posts.html</a>
-                <br>
-                <a href="/about">cd ~/about.html</a>
+                <a href="/posts">cat ~/posts.md</a>
+                <a href="/about">cat ~/about.md</a>
                 
                 {% if request.cookies.get('admin_token') %}
-                    <a href="/admin">Admin</a>
-                    <br>
-                    <a href="/admin/logout">Logout</a>
+                    <a href="/admin">sudo admin</a>
+                    <a href="/admin/logout">exit</a>
                 {% endif %}
             </div>
         </div>

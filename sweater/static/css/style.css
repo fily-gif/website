@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,500;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 @import url('https://unpkg.com/@catppuccin/palette/css/catppuccin.css');
 
 @keyframes glow {
@@ -12,21 +12,24 @@
 }
 
 body {
-    font-family: 'Roboto Mono', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     line-height: 1.6;
     margin: 0;
     padding: 0;
     background-color: var(--ctp-frappe-base);
+    color: var(--ctp-frappe-text);
 }
 
+/* Terminal-style links */
 a {
-    color: var(--ctp-frappe-blue) !important;
+    color: var(--ctp-frappe-green) !important;
     text-decoration: none !important;
+    border-bottom: 1px solid transparent;
 }
 
 a:hover {
-    color: var(--ctp-frappe-blue) !important;
-    text-decoration: underline !important;
+    border-bottom: 1px solid var(--ctp-frappe-green) !important;
+    text-decoration: none !important;
 }
 
 .text-little {
@@ -67,15 +70,28 @@ a:hover {
     animation: glow 1s ease-in-out infinite alternate;
 }
 
+/* Terminal-style containers */
 .container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
 }
 
+/* Terminal-style header */
 header {
-    text-align: center;
-    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--ctp-frappe-surface0);
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+}
+
+header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+header h1::before {
+    content: "~/";
+    color: var(--ctp-frappe-blue);
 }
 
 .intro {
@@ -87,10 +103,11 @@ header {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Terminal-style stats */
 .stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
     text-align: center;
     font-size: 1.2rem;
 }
@@ -100,18 +117,24 @@ header {
     font-weight: bold;
 }
 
+/* Terminal-style stat-box */
 .stat-box {
     background-color: var(--ctp-frappe-mantle);
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    border: 1px solid var(--ctp-frappe-surface0);
+    border-radius: 0;
+}
+
+.stat-box h3::before {
+    content: "$ ";
+    color: var(--ctp-frappe-blue);
 }
 
 .wiiide-stat-box {
     background-color: var(--ctp-frappe-mantle);
     padding: 0;
-    width: 25.7rem;
-    height: 210px;
+    width: 100%;  /* Changed from fixed width */
+    height: 240px; /* Increased height */
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -140,7 +163,8 @@ header {
 
 .navbar {
     background-color: var(--ctp-frappe-crust);
-    padding: 1rem 0;
+    border-bottom: 1px solid var(--ctp-frappe-surface0);
+    padding: 0.5rem 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     align-items: center;
 }
@@ -153,19 +177,25 @@ header {
     align-items: center;
 }
 
+/* Terminal-style nav-links */
 .nav-links {
     display: flex;
-    gap: 1.5rem;
+    flex-direction: row; /* Changed from column to row */
+    gap: 2rem; /* Increased gap for better spacing */
     align-items: center;
-    right: 50% !important;
     justify-content: center;
-    height: 100%;
+    padding: 0.5rem 0;
 }
 
 .nav-links a {
     text-decoration: none;
     transition: color 0.3s ease;
     display: flex;
+}
+
+.nav-links a::before {
+    content: "$ ";
+    color: var(--ctp-frappe-blue);
 }
 
 /* MARK: FILES */
@@ -199,11 +229,12 @@ header {
 
 /* MARK: POST STYLES */
 
+/* Terminal-style post-preview */
 .post-preview {
     background-color: var(--ctp-frappe-mantle);
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--ctp-frappe-surface0);
+    margin-bottom: 0.5rem;
     transition: transform 0.2s ease;
 }
 
@@ -217,9 +248,15 @@ header {
     transform: translateX(5px);
 }
 
+/* Terminal-style post-preview h2 */
 .post-preview h2 {
+    font-size: 1.1rem;
     margin: 0;
-    margin-bottom: 0.5rem;
+}
+
+.post-preview h2::before {
+    content: "# ";
+    color: var(--ctp-frappe-blue);
 }
 
 .post-category {
@@ -547,4 +584,12 @@ button:hover {
 .markdown-preview {
     text-align: left;
     padding: 1rem;
+}
+
+.stat-box iframe {
+    width: 410px;
+    height: 210px;
+    border: none;
+    display: block;
+    margin: 0 auto;
 }
