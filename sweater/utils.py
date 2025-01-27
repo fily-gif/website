@@ -12,6 +12,7 @@ import string
 import re
 from collections import defaultdict
 import time
+import requests
 
 fake = Faker('en_US')
 
