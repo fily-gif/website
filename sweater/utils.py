@@ -4,20 +4,19 @@ import random as rng
 import psutil
 from datetime import datetime
 import markdown
-import frontmatter
 from functools import wraps
-from flask import request, redirect, url_for
+from flask import request
 import json
 import string
 import re
 from collections import defaultdict
 import time
-import requests
 
 fake = Faker('en_US')
 
 def get_key():
-    return 'incorrect cat HORSE glasses'
+    with open('key.txt', 'r') as f:
+        return f.read().strip()
 
 def requires_auth(f):
     @wraps(f)
