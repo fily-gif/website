@@ -64,7 +64,6 @@ def post(blog_name):
     post = content_manager.get_post(blog_name)
     if post:
         comments = comments_manager.get_comments(blog_name)
-        # Add meta tags for Discord embed
         meta = {
             'title': post['title'],
             'type': 'article',
