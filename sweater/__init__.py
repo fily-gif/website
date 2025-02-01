@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from flask_wtf.csrf import CSRFProtect
 from sweater import utils
 from werkzeug.utils import secure_filename
