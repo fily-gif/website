@@ -15,6 +15,7 @@ import time
 fake = Faker('en_US')
 
 def get_key():
+    os.chdir(os.path.dirname(__file__))
     with open('key.txt', 'r') as f:
         return f.read().strip()
 

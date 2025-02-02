@@ -22,4 +22,25 @@
     </div>
     <button type="submit" class="button">Create Post</button>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const easyMDE = new EasyMDE({
+        element: document.getElementById('content'),
+        spellChecker: false,
+        autosave: {
+            enabled: true,
+            delay: 1000,
+            uniqueId: 'post_content'
+        },
+        toolbar: [
+            'bold', 'italic', 'heading', '|',
+            'quote', 'unordered-list', 'ordered-list', '|',
+            'link', 'image', 'code', '|',
+            'preview', 'side-by-side', 'fullscreen', '|',
+            'guide'
+        ]
+    });
+});
+</script>
 {% endblock %}

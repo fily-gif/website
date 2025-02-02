@@ -231,6 +231,17 @@ header h1::before {
 
 /* MARK: POST STYLES */
 
+.editor-toolbar {
+    border-radius: 4px 4px 0 0;
+    border-color: #ff0000;
+}
+
+.CodeMirror {
+    height: 400px;
+    border-radius: 0 0 4px 4px;
+    border-color: #ff0000;
+}
+
 .post-preview {
     background-color: var(--ctp-frappe-mantle);
     padding: 1rem;
