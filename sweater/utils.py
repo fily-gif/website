@@ -2,7 +2,7 @@ import os
 from faker import Faker
 import random as rng
 import psutil
-from datetime import datetime
+from datetime import datetime, timedelta
 import markdown
 from functools import wraps
 from flask import request
@@ -14,6 +14,7 @@ import time
 import subprocess
 import io
 import contextlib
+import hmac
 
 fake = Faker('en_US')
 
@@ -23,12 +24,79 @@ def get_key():
     with open(key_path, 'r') as f:
         return f.read().strip()
 
+class SecurityManager:
+    def __init__(self):
+        self.login_attempts = defaultdict(list)
+        self.max_attempts = 5
+        self.block_duration = 3600  # 1 hour in seconds
+        self.session_duration = 3600  # 1 hour in seconds
+        self.blocked_ips = set()
+
+    def is_ip_blocked(self, ip):
+        return ip in self.blocked_ips
+
+    def _clean_old_attempts(self, ip):
+        now = time.time()
+        self.login_attempts[ip] = [
+            attempt for attempt in self.login_attempts[ip]
+            if now - attempt < self.block_duration
+        ]
+
+    def check_rate_limit(self, ip):
+        if self.is_ip_blocked(ip):
+            return False
+
+        self._clean_old_attempts(ip)
+        if len(self.login_attempts[ip]) >= self.max_attempts:
+            self.blocked_ips.add(ip)
+            return False
+        return True
+
+    def record_attempt(self, ip):
+        self.login_attempts[ip].append(time.time())
+
+    def validate_session(self, token, ip):
+        if not token:
+            return False
+        try:
+            # Split token into timestamp, ip hash, and signature
+            timestamp_str, ip_hash, sig = token.split('.')
+            timestamp = int(timestamp_str)
+
+            # Check if session is expired
+            if time.time() - timestamp > self.session_duration:
+                return False
+
+            # Verify IP hasn't changed
+            if ip_hash != hmac.new(get_key().encode(), ip.encode(), 'sha256').hexdigest()[:8]:
+                return False
+
+            # Verify signature
+            expected_sig = self.generate_signature(timestamp_str, ip_hash)
+            return hmac.compare_digest(sig, expected_sig)
+        except:
+            return False
+
+    def generate_session_token(self, ip):
+        timestamp = str(int(time.time()))
+        ip_hash = hmac.new(get_key().encode(), ip.encode(), 'sha256').hexdigest()[:8]
+        signature = self.generate_signature(timestamp, ip_hash)
+        return f"{timestamp}.{ip_hash}.{signature}"
+
+    def generate_signature(self, timestamp, ip_hash):
+        msg = f"{timestamp}.{ip_hash}".encode()
+        return hmac.new(get_key().encode(), msg, 'sha256').hexdigest()[:16]
+
+security_manager = SecurityManager()
+
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         auth = request.cookies.get('admin_token')
-        if not auth or auth != get_key():
-            return "Go away." # redirect(url_for('admin_login', next=request.url))
+        client_ip = request.remote_addr
+
+        if not auth or not security_manager.validate_session(auth, client_ip):
+            return "Unauthorized access.", 403
         return f(*args, **kwargs)
     return decorated
 

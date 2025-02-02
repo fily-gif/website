@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response
 from flask_wtf.csrf import CSRFProtect
 from sweater import utils
 from werkzeug.utils import secure_filename
@@ -60,6 +60,16 @@ python_executor = utils.PythonExecutor()
 def error(e):
     return render_template('error.html', status_code=e.code)
 
+@app.before_request
+def before_request():
+    # Add CORS protection
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers["Access-Control-Allow-Origin"] = "same-origin"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        return response
+
 @app.route('/')
 def index():
     return render_template('home.html', stats=content_manager.get_stats())
@@ -109,10 +119,27 @@ def short_link(short_id):
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
-        if request.form.get('password') == utils.get_key():  # In production, use proper authentication
+        client_ip = request.remote_addr
+        
+        # Check if IP is allowed to attempt login
+        if not utils.security_manager.check_rate_limit(client_ip):
+            flash('Too many login attempts. Try again later.', 'error')
+            return render_template('admin_login.html'), 429
+
+        # Validate password
+        if request.form.get('password') == utils.get_key():
+            # Generate secure session token
+            session_token = utils.security_manager.generate_session_token(client_ip)
             response = redirect(request.args.get('next', url_for('admin')))
-            response.set_cookie('admin_token', utils.get_key(), httponly=True, secure=True)
+            response.set_cookie('admin_token', session_token, 
+                              httponly=True, 
+                              secure=True, 
+                              samesite='Strict',
+                              max_age=3600)  # 1 hour
             return response
+
+        # Record failed attempt
+        utils.security_manager.record_attempt(client_ip)
         flash('Invalid password', 'error')
     return render_template('admin_login.html')
 

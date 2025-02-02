@@ -5,8 +5,12 @@
     <meta property="og:title" content="{{ meta.title }}">
     <meta property="og:type" content="{{ meta.type }}">
     <meta property="og:url" content="{{ meta.url }}">
+    <meta name="twitter:card" content="{% if meta.type == 'image' %}summary_large_image{% else %}summary{% endif %}">
+    <meta name="twitter:title" content="{{ filename }}">
+    <meta name="twitter:url" content="{{ meta.url }}">
     {% if meta.image %}
     <meta property="og:image" content="{{ meta.image }}">
+    <meta name="twitter:card" content="summary_large_image">
     {% endif %}
     <meta name="theme-color" content="#FF5733">
 </head>
