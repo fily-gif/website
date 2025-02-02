@@ -102,6 +102,7 @@ def requires_auth(f):
 
 def git_pull():
     try:
+        print("Pulling from git...")
         subprocess.run(['git', 'pull'], 
                       check=True, 
                       capture_output=True,
