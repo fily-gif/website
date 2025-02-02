@@ -11,12 +11,16 @@ import string
 import re
 from collections import defaultdict
 import time
+import subprocess
+import io
+import contextlib
 
 fake = Faker('en_US')
 
 def get_key():
-    os.chdir(os.path.dirname(__file__))
-    with open('key.txt', 'r') as f:
+    # Don't change directories - security risk
+    key_path = os.path.join(os.path.dirname(__file__), 'key.txt')
+    with open(key_path, 'r') as f:
         return f.read().strip()
 
 def requires_auth(f):
@@ -29,7 +33,14 @@ def requires_auth(f):
     return decorated
 
 def git_pull():
-    os.system('git pull')
+    try:
+        subprocess.run(['git', 'pull'], 
+                      check=True, 
+                      capture_output=True,
+                      cwd=os.path.dirname(__file__))
+        return True
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"Git pull failed: {e.stderr.decode()}")
 
 class LinkShortener:
     def __init__(self):
@@ -118,7 +129,15 @@ class Content:
             return None
 
     def get_post(self, blog_name):
+        # Sanitize blog_name to prevent path traversal
+        if not re.match(r'^[a-zA-Z0-9-]+$', blog_name):
+            return None
+            
         post_path = os.path.join(self.root, blog_name, f"{blog_name}.md")
+        post_path = os.path.abspath(post_path)
+        if not post_path.startswith(self.root):
+            return None
+            
         if os.path.exists(post_path):
             with open(post_path, 'r') as f:
                 content = f.read()
@@ -251,6 +270,14 @@ class Comments:
         return False
 
     def add_comment(self, post_id, content, ip):
+        # Sanitize inputs
+        content = content.strip()
+        if not content:
+            raise ValueError("Empty comment")
+            
+        # Add HTML escaping
+        content = content.replace('<', '&lt;').replace('>', '&gt;')
+        
         if self.is_ip_blocked(ip):
             raise ValueError("Your IP has been blocked from commenting")
         if self._is_rate_limited(ip):
@@ -296,3 +323,53 @@ class Comments:
                     'date': comment['date']
                 })
         return sorted(all_comments, key=lambda x: x['date'], reverse=True)
+
+class PythonExecutor:
+    SAFE_BUILTINS = {
+        'abs': abs,
+        'all': all,
+        'any': any,
+        'ascii': ascii,
+        'bin': bin,
+        'bool': bool,
+        'chr': chr,
+        'dict': dict,
+        'dir': dir,
+        'divmod': divmod,
+        'enumerate': enumerate,
+        'filter': filter,
+        'float': float,
+        'format': format,
+        'hex': hex,
+        'int': int,
+        'isinstance': isinstance,
+        'len': len,
+        'list': list,
+        'map': map,
+        'max': max,
+        'min': min,
+        'oct': oct,
+        'ord': ord,
+        'pow': pow,
+        'print': print,
+        'range': range,
+        'repr': repr,
+        'reversed': reversed,
+        'round': round,
+        'set': set,
+        'slice': slice,
+        'sorted': sorted,
+        'str': str,
+        'sum': sum,
+        'tuple': tuple,
+        'zip': zip,
+    }
+
+    def execute(self, code):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            try:
+                exec(code, {'__builtins__': self.SAFE_BUILTINS}, {})
+            except Exception as e:
+                print(f"Error: {str(e)}")
+        return output.getvalue()

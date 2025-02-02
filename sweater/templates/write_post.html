@@ -18,7 +18,10 @@
     </div>
     <div class="form-group">
         <label for="content">Content (Markdown)</label>
-        <textarea id="content" name="content" rows="20" required></textarea>
+        <div class="editor-container">
+            <textarea id="content" name="content"></textarea>
+            <div class="preview-container" id="preview"></div>
+        </div>
     </div>
     <button type="submit" class="button">Create Post</button>
 </form>
@@ -41,6 +44,23 @@ document.addEventListener('DOMContentLoaded', function() {
             'guide'
         ]
     });
+
+    const preview = document.getElementById('preview');
+    const form = document.querySelector('.write-post-form');
+    
+    easyMDE.codemirror.on('change', () => {
+        preview.innerHTML = easyMDE.markdown(easyMDE.value());
+    });
+
+    // Add form validation
+    form.onsubmit = function(e) {
+        if (!easyMDE.value().trim()) {
+            e.preventDefault();
+            alert('Content cannot be empty');
+            return false;
+        }
+        return true;
+    };
 });
 </script>
 {% endblock %}

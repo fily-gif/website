@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="file-browser python-executor">
+    <h1>Python Executor</h1>
+    <form id="executeForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <textarea name="code" placeholder="Enter Python code here...">print("Hello World!")</textarea>
+        <button type="submit">Execute</button>
+    </form>
+    <div class="output"></div>
+</div>
+
+<script>
+    document.getElementById('executeForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const code = e.target.code.value;
+        const csrf_token = e.target.csrf_token.value;
+        const response = await fetch('/admin/execute', {
+            method: 'POST',
+            body: new URLSearchParams({
+                code,
+                csrf_token
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrf_token
+            },
+            credentials: 'same-origin'  // This sends cookies including admin_token
+        });
+        const output = await response.text();
+        document.querySelector('.output').textContent = output;
+    };
+</script>
+{% endblock %}

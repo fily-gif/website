@@ -68,7 +68,8 @@
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrf_token]').value,
-                'Authorization': document.cookie.get('admin_token')
+                'Authorization': document.cookie.match('admin_token=([^;]+)')?.[1]
+            }
         }).then(response => {
             if (response.ok) {
                 if (action === 'delete' || action === 'both') {

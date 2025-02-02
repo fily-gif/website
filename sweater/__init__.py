@@ -6,6 +6,9 @@ from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import re
 from pathlib import Path
+import io
+import sys
+import contextlib
 
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
@@ -22,8 +25,14 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'md'}
 # Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Add CSRF protection to all POST routes
+app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hour
+app.config['WTF_CSRF_SSL_STRICT'] = True
+
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS and \
+           not any(c in filename for c in '\\/:*?"<>|')
 
 def is_safe_path(path):
     """Check if the path is safe (no directory traversal)"""
@@ -45,6 +54,7 @@ def get_file_type(filename):
 content_manager = utils.Content()
 link_shortener = utils.LinkShortener()
 comments_manager = utils.Comments()
+python_executor = utils.PythonExecutor()
 
 @app.errorhandler(HTTPException) # dynamic error page
 def error(e):
@@ -244,6 +254,10 @@ def upload_file():
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     """View file page with meta tags and proper display"""
+    file_path = os.path.abspath(os.path.join(UPLOAD_FOLDER, filename))
+    if not file_path.startswith(os.path.abspath(UPLOAD_FOLDER)):
+        return "Access denied", 403
+
     file_url = url_for('raw_file', filename=filename, _external=True)
     meta = {
         'title': filename,
@@ -273,29 +287,18 @@ def list_files():
 def git_pull():
     try:
         utils.git_pull()
-        flash('Git pull successful', 'success')
     except Exception as e:
         flash(f'Error during git pull: {e}', 'error')
     return redirect(url_for('admin'))
 
-"""@app.route('/admin/exec_python', methods=['POST'])
+@app.route('/admin/execute', methods=['POST'])
 @utils.requires_auth
-def exec_python(code=None):
-    print('got the request!')
-    code = request.cookies.get('code')
-    print(code)
-    if code:
-        try:
-            print('executing code!')
-            result = exec(code)
-            crafted = {
-                'result': result,
-                'type': type(result).__name__,
-                'code': code
-            }
-            print(crafted)
-            flash('Code executed successfully', 'success')
-            return result
-        except Exception as e:
-            flash(f'Error executing code: {e}', 'error')
-    return redirect(url_for('admin'))"""
+def execute_python():
+    code = request.form.get('code', '')
+    output = python_executor.execute(code)
+    return output, 200, {'Content-Type': 'text/plain'}
+
+@app.route('/admin/execute-page')
+@utils.requires_auth
+def execute_page():
+    return render_template('execute.html')

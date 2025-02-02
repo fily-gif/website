@@ -92,10 +92,8 @@ header h1::before {
     color: var(--ctp-frappe-blue);
 }
 
-.noslash {
+.noslash::before {
     content: "" !important;
-    font-size: 1.2rem;
-    margin: 0;
 }
 
 .intro {
@@ -603,4 +601,102 @@ button:hover {
     border: none;
     display: block;
     margin: 0 auto;
+}
+
+/* MARK: PYTHON EXECUTOR */
+.python-executor textarea {
+    width: 100%;
+    height: 200px;
+    font-family: 'JetBrains Mono', monospace;
+    background-color: var(--ctp-frappe-crust);
+    color: var(--ctp-frappe-text);
+    border: 1px solid var(--ctp-frappe-surface0);
+    padding: 10px;
+}
+
+.python-executor .output {
+    background-color: var(--ctp-frappe-mantle);
+    padding: 10px;
+    margin-top: 10px;
+    white-space: pre;
+    color: var(--ctp-frappe-text);
+    font-family: 'JetBrains Mono', monospace;
+    border: 1px solid var(--ctp-frappe-surface0);
+}
+
+/* MARK: EASYMDE STYLING */
+.EasyMDEContainer {
+    background-color: var(--ctp-frappe-mantle);
+}
+
+.editor-toolbar {
+    border-color: var(--ctp-frappe-surface0) !important;
+    background-color: var(--ctp-frappe-surface0) !important;
+}
+
+.editor-toolbar button {
+    color: var(--ctp-frappe-text) !important;
+    background-color: transparent !important;
+}
+
+.editor-toolbar button:hover {
+    background-color: var(--ctp-frappe-surface1) !important;
+    border-color: var(--ctp-frappe-surface2) !important;
+}
+
+.editor-toolbar.disabled-for-preview button:not(.no-disable) {
+    background-color: var(--ctp-frappe-surface0) !important;
+}
+
+.CodeMirror {
+    background-color: var(--ctp-frappe-base) !important;
+    color: var(--ctp-frappe-text) !important;
+    border-color: var(--ctp-frappe-surface0) !important;
+}
+
+.CodeMirror-cursor {
+    border-left: 1px solid var(--ctp-frappe-text) !important;
+}
+
+.CodeMirror-selected {
+    background: var(--ctp-frappe-surface2) !important;
+}
+
+.CodeMirror-line {
+    color: var(--ctp-frappe-text) !important;
+}
+
+.cm-s-easymde .cm-header {
+    color: var(--ctp-frappe-blue) !important;
+}
+
+.cm-s-easymde .cm-url {
+    color: var(--ctp-frappe-green) !important;
+}
+
+.cm-s-easymde .cm-link {
+    color: var(--ctp-frappe-blue) !important;
+}
+
+.cm-s-easymde .cm-strong {
+    color: var(--ctp-frappe-red) !important;
+}
+
+.cm-s-easymde .cm-em {
+    color: var(--ctp-frappe-pink) !important;
+}
+
+.cm-s-easymde .cm-code {
+    color: var(--ctp-frappe-mauve) !important;
+}
+
+.editor-preview {
+    background-color: var(--ctp-frappe-base) !important;
+    color: var(--ctp-frappe-text) !important;
+}
+
+.editor-preview-side {
+    background-color: var(--ctp-frappe-base) !important;
+    color: var(--ctp-frappe-text) !important;
+    border-color: var(--ctp-frappe-surface0) !important;
 }
