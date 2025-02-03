@@ -21,6 +21,15 @@
     </div>
 </section>
 
+<section class="admin-stats">
+    <div class="stat-box">
+        <h3>Git info</h3>
+        <p>Branch: {{ git.branch['message'] }}</p>
+        <p>Commit: {{ git.commit['message'][:7] }}</p>
+        <p>Can pull? {{ git.can_pull['message'] }}</p>
+
+</section>
+
 <section class="admin-comments">
     <h2>Recent Comments</h2>
     {% if all_comments %}

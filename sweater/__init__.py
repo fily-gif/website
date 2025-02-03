@@ -1,14 +1,10 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, make_response, session
 from flask_wtf.csrf import CSRFProtect
 from sweater import utils
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import re
-from pathlib import Path
-import io
-import sys
-import contextlib
 
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
@@ -55,6 +51,7 @@ content_manager = utils.Content()
 link_shortener = utils.LinkShortener()
 comments_manager = utils.Comments()
 python_executor = utils.PythonExecutor()
+git_manager = utils.GitManager()
 
 @app.errorhandler(HTTPException) # dynamic error page
 def error(e):
@@ -176,16 +173,27 @@ def moderate_comment(action, blog_name, comment_index):
 @app.route('/admin')
 @utils.requires_auth
 def admin():
+    if 'git_pull_message' in session:
+        result = session.pop('git_pull_message')
+        flash(f"Git pull: {result['message']}", result['status'])
+    
     stats = {
         'total_comments': comments_manager.get_stats()['total'],
         'blocked_ips': comments_manager.get_stats()['blocked_ips'],
         'total_links': link_shortener.get_stats(),
         'total_posts': len(content_manager.blogs) if content_manager.blogs else 0
     }
+    git = {
+        'branch': git_manager.branch(),
+        'remote': git_manager.remote(),
+        'can_pull': git_manager.can_pull(),
+        'commit': git_manager.commit(),
+    }
+
     all_comments = comments_manager.get_all_comments()
     blocked_ips = comments_manager.blacklist.get('ips', [])
     password = utils.get_key()
-    return render_template('admin.html', stats=stats, all_comments=all_comments, blocked_ips=blocked_ips, password=password)
+    return render_template('admin.html', stats=stats, all_comments=all_comments, blocked_ips=blocked_ips, password=password, git=git)
 
 @app.route('/admin/unblock/<ip>', methods=['POST'])
 @utils.requires_auth
@@ -312,10 +320,8 @@ def list_files():
 @app.route('/admin/git/pull')
 @utils.requires_auth
 def git_pull():
-    try:
-        utils.git_pull()
-    except Exception as e:
-        flash(f'Error during git pull: {e}', 'error')
+    result = utils.git_pull()
+    session['git_pull_message'] = result
     return redirect(url_for('admin'))
 
 @app.route('/admin/execute', methods=['POST'])

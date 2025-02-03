@@ -96,20 +96,83 @@ def requires_auth(f):
         client_ip = request.remote_addr
 
         if not auth or not security_manager.validate_session(auth, client_ip):
-            return "Unauthorized access.", 403
+            return "Go away.", 403
         return f(*args, **kwargs)
     return decorated
 
-def git_pull():
-    try:
-        print("Pulling from git...")
-        subprocess.run(['git', 'pull'], 
-                      check=True, 
-                      capture_output=True,
-                      cwd=os.path.dirname(__file__))
-        return True
-    except subprocess.CalledProcessError as e:
-        raise Exception(f"Git pull failed: {e.stderr.decode()}")
+class GitManager:
+    @staticmethod
+    def git_pull():
+        try:
+            result = subprocess.run(['git', 'pull'], 
+                        check=True, 
+                        capture_output=True,
+                        cwd=os.path.dirname(__file__))
+            output = result.stdout.decode().strip()
+            if "Already up to date" in output:
+                return {'status': 'success', 'message': 'Already up to date'}
+            return {'status': 'success', 'message': output.split('\n')[-1]}
+        except subprocess.CalledProcessError as e:
+            return {'status': 'error', 'message': str(e)}
+
+    @staticmethod
+    def branch():
+        try:
+            result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
+                        check=True, 
+                        capture_output=True,
+                        cwd=os.path.dirname(__file__))
+            return {
+                'status': 'success',
+                'message': result.stdout.decode().strip()
+            }
+        except subprocess.CalledProcessError as e:
+            return {'status': 'error', 'message': str(e)}
+
+    @staticmethod
+    def remote():
+        try:
+            result = subprocess.run(['git', 'config', '--get', 'remote.origin.url'], 
+                        check=True, 
+                        capture_output=True,
+                        cwd=os.path.dirname(__file__))
+            return {
+                'status': 'success',
+                'message': result.stdout.decode().strip()
+            }
+        except subprocess.CalledProcessError as e:
+            return {'status': 'error', 'message': str(e)}
+
+    @staticmethod
+    def can_pull():
+        try:
+            subprocess.run(['git', 'fetch'], check=True, capture_output=True,
+                         cwd=os.path.dirname(__file__))
+            result = subprocess.run(['git', 'rev-list', 'HEAD..origin/HEAD', '--count'], 
+                        check=True, 
+                        capture_output=True,
+                        cwd=os.path.dirname(__file__))
+            count = int(result.stdout.decode().strip())
+            return {
+                'status': 'success',
+                'message': f'Updates available: {count}' if count > 0 else 'No updates available'
+            }
+        except subprocess.CalledProcessError as e:
+            return {'status': 'error', 'message': str(e)}
+
+    @staticmethod
+    def commit():
+        try:
+            result = subprocess.run(['git', 'log', '-1', '--format=%H %s'], 
+                        check=True, 
+                        capture_output=True,
+                        cwd=os.path.dirname(__file__))
+            return {
+                'status': 'success',
+                'message': result.stdout.decode().strip()
+            }
+        except subprocess.CalledProcessError as e:
+            return {'status': 'error', 'message': str(e)}
 
 class LinkShortener:
     def __init__(self):
