@@ -5,6 +5,7 @@ from sweater import utils
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import re
+from datetime import datetime
 
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
@@ -44,6 +45,8 @@ def sanitize_path(filename):
 
 def get_file_type(filename):
     """Determine if file is an image or other type"""
+    print(filename)
+    print(filename.rsplit('.', 1))
     ext = filename.rsplit('.', 1)[1].lower()
     return 'image' if ext in {'png', 'jpg', 'jpeg', 'gif'} else 'article' if ext == 'md' else 'file'
 
@@ -53,7 +56,7 @@ comments_manager = utils.Comments()
 python_executor = utils.PythonExecutor()
 git_manager = utils.GitManager()
 
-@app.errorhandler(HTTPException) # dynamic error page
+@app.errorhandler(HTTPException)
 def error(e):
     return render_template('error.html', status_code=e.code)
 
@@ -185,9 +188,9 @@ def admin():
     }
     git = {
         'branch': git_manager.branch(),
-        'remote': git_manager.remote(),
-        'can_pull': git_manager.can_pull(),
         'commit': git_manager.commit(),
+        'can_pull': git_manager.can_pull(),
+        'remote': git_manager.remote(), # unused
     }
 
     all_comments = comments_manager.get_all_comments()
@@ -335,3 +338,27 @@ def execute_python():
 @utils.requires_auth
 def execute_page():
     return render_template('execute.html')
+
+@app.route('/admin/view-links')
+@utils.requires_auth
+def view_links():
+    links = link_shortener.links
+    return render_template('view_links.html', links=links)
+
+@app.route('/admin/view-files')
+@utils.requires_auth
+def view_files():
+    files = []
+    for root, _, filenames in os.walk(UPLOAD_FOLDER):
+        for filename in filenames:
+            full_path = os.path.join(root, filename)
+            rel_path = os.path.relpath(full_path, UPLOAD_FOLDER)
+            size = os.path.getsize(full_path)
+            mod_time = os.path.getmtime(full_path)
+            files.append({
+                'name': rel_path,
+                'size': size,
+                'modified': mod_time,
+                'url': url_for('raw_file', filename=rel_path)
+            })
+    return render_template('view_files.html', files=files, datetime=datetime)

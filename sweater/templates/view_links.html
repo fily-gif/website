@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-section">
+    <h2>Uploaded Links</h2>
+    <div class="links-list">
+        {% if links %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Short ID</th>
+                        <th>Target URL</th>
+                        <th>Short URL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for short_id, url in links.items() %}
+                    <tr>
+                        <td>{{ short_id }}</td>
+                        <td><a href="{{ url }}" target="_blank">{{ url }}</a></td>
+                        <td><a href="{{ url_for('short_link', short_id=short_id, _external=True) }}" target="_blank">{{ url_for('short_link', short_id=short_id, _external=True) }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No links found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

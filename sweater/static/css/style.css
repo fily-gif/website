@@ -701,6 +701,41 @@ button:hover {
     border-color: var(--ctp-frappe-surface0) !important;
 }
 
+/* MARK: FILE AND LINKS STUFF */
+.admin-section {
+    background-color: var(--ctp-frappe-mantle);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.links-list table,
+.files-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.links-list th,
+.files-list th,
+.links-list td,
+.files-list td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--ctp-frappe-surface0);
+}
+
+.links-list th,
+.files-list th {
+    background-color: var(--ctp-frappe-surface0);
+    font-weight: bold;
+}
+
+.links-list tr:hover,
+.files-list tr:hover {
+    background-color: var(--ctp-frappe-surface1);
+}
+
 /* MARK: MOBILE BS */
 
 @media screen and (max-width: 768px) {
@@ -785,6 +820,16 @@ button:hover {
 
     .admin-comment {
         padding: 0.75rem;
+    }
+
+    .links-list,
+    .files-list {
+        overflow-x: auto;
+    }
+    
+    .links-list table,
+    .files-list table {
+        font-size: 0.9rem;
     }
 }
 

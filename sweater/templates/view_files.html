@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-section">
+    <h2>Uploaded Files</h2>
+    <div class="files-list">
+        {% if files %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Size</th>
+                        <th>Modified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td>{{ file.name }}</td>
+                        <td>{{ '{:.2f}'.format(file.size / 1024) }} KB</td>	
+                        <td>{{ datetime.fromtimestamp(file.modified).strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            <a href="{{ file.url }}" target="_blank">View</a> |
+                            <a href="{{ url_for('uploaded_file', filename=file.name) }}">Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No files found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
