@@ -323,7 +323,7 @@ def list_files():
 @app.route('/admin/git/pull')
 @utils.requires_auth
 def git_pull():
-    result = utils.git_pull()
+    result = git_manager.git_pull()
     session['git_pull_message'] = result
     return redirect(url_for('admin'))
 
