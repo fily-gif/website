@@ -155,7 +155,7 @@ class GitManager:
             count = int(result.stdout.decode().strip())
             return {
                 'status': 'success',
-                'message': f'Updates available: {count}' if count > 0 else 'No updates available'
+                'message': count
             }
         except subprocess.CalledProcessError as e:
             return {'status': 'error', 'message': str(e)}
@@ -220,7 +220,6 @@ class Content:
                         self.blogs.append(blog_dir)
     
     def _extract_title(self, content):
-        """Extract first h1 header from markdown content"""
         lines = content.split('\n')
         for line in lines:
             if line.startswith('# '):
@@ -283,7 +282,6 @@ class Content:
         return None
 
     def _get_next_number(self):
-        """Get the next available number for post folder"""
         numbers = []
         for blog_dir in os.listdir(self.root):
             try:
