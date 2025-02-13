@@ -348,6 +348,7 @@ class Comments:
         self.max_comments_per_period = 3
         self.blacklist_file = os.path.join(os.path.dirname(__file__), "static/ip_blacklist.json")
         self.blacklist = self._load_blacklist()
+        self.name_seeds = {}  # Add this line to store IP-based seeds
 
     def _load_comments(self):
         if os.path.exists(self.comments_file):
@@ -384,9 +385,14 @@ class Comments:
             return True
         return False
 
-    @staticmethod
-    def name():
-        return fake.name()
+    def name(self, ip):
+        # Use IP as seed to generate consistent names
+        if ip not in self.name_seeds:
+            # Create a new Faker instance with IP as seed
+            self.name_seeds[ip] = fake.random(ip).randint(0, 2**32)
+        temp_fake = Faker('en_US')
+        temp_fake.seed_instance(self.name_seeds[ip])
+        return temp_fake.name()
 
     def _is_rate_limited(self, ip):
         now = time.time()
@@ -420,7 +426,7 @@ class Comments:
             self.comments[post_id] = []
         
         self.comments[post_id].append({
-            'name': self.name(),
+            'name': self.name(ip),  # Change this line to pass IP
             'content': content,
             'date': datetime.now().isoformat().split(".")[0].replace("T", " "),
         })
