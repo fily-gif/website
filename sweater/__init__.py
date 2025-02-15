@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import re
 from datetime import datetime
+from sweater.utils import emoji_manager
 
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
@@ -45,8 +46,6 @@ def sanitize_path(filename):
 
 def get_file_type(filename):
     """Determine if file is an image or other type"""
-    print(filename)
-    print(filename.rsplit('.', 1))
     ext = filename.rsplit('.', 1)[1].lower()
     return 'image' if ext in {'png', 'jpg', 'jpeg', 'gif'} else 'article' if ext == 'md' else 'file'
 
@@ -83,6 +82,8 @@ def posts():
 def post(blog_name):
     post = content_manager.get_post(blog_name)
     if post:
+        # Apply emoji replacement to post content
+        post['content'] = emoji_manager.replace_emoji_tags(post['content'])
         comments = comments_manager.get_comments(blog_name)
         meta = {
             'title': post['title'],
@@ -99,6 +100,8 @@ def add_comment(blog_name):
         content = request.form.get('content')
         if content:
             try:
+                # Apply emoji replacement before storing
+                # content = emoji_manager.replace_emoji_tags(content) #! TODO: make this only available to admin (me :droidangel:)
                 comments_manager.add_comment(blog_name, content, request.remote_addr)
             except ValueError as e:
                 flash(str(e), 'error')
@@ -312,7 +315,6 @@ def raw_file(filename):
 @app.route('/admin/list-files')
 @utils.requires_auth
 def list_files():
-    print('listing files')
     files = []
     for root, dirs, filenames in os.walk(UPLOAD_FOLDER):
         for filename in filenames:
@@ -362,3 +364,12 @@ def view_files():
                 'url': url_for('raw_file', filename=rel_path)
             })
     return render_template('view_files.html', files=files, datetime=datetime)
+
+@app.route('/api/emojis', methods=['GET'])
+def list_emojis():
+    query = request.args.get('q', '').strip()
+    if query:
+        emojis = emoji_manager.search_emojis(query)
+    else:
+        emojis = emoji_manager.get_all_emojis()
+    return {'emojis': emojis}

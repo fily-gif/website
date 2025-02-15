@@ -229,6 +229,11 @@ header h1::before {
 
 /* MARK: POST STYLES */
 
+.emoji {
+    height: 2rem;
+    width: 2rem;
+}
+
 .editor-toolbar {
     border-radius: 4px 4px 0 0;
     border-color: #ff0000;

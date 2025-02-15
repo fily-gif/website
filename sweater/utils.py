@@ -100,6 +100,7 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
+
 class GitManager:
     @staticmethod
     def git_pull():
@@ -389,7 +390,7 @@ class Comments:
         # Use IP as seed to generate consistent names
         if ip not in self.name_seeds:
             # Create a new Faker instance with IP as seed
-            self.name_seeds[ip] = fake.random(ip).randint(0, 2**32)
+            self.name_seeds[ip] = fake.random.randint(0, 2**32)
         temp_fake = Faker('en_US')
         temp_fake.seed_instance(self.name_seeds[ip])
         return temp_fake.name()
@@ -509,3 +510,66 @@ class PythonExecutor:
             except Exception as e:
                 print(f"Error: {str(e)}")
         return output.getvalue()
+
+class EmojiManager:
+    def __init__(self):
+        self.emoji_file = os.path.join(os.path.dirname(__file__), "static/emojis/emoji.json")
+        self.emojis = self._load_emojis()
+        self.extension_pattern = re.compile(r'\.(gif|png|jpg|jpeg)$', re.IGNORECASE)
+        
+    def _load_emojis(self):
+        if os.path.exists(self.emoji_file):
+            with open(self.emoji_file, 'r') as f:
+                return json.load(f)
+        return {}
+
+    def get_emoji_path(self, name):
+        """Get emoji file path from name or alias"""
+        for filename, data in self.emojis.items():
+            if (name == data['names']['used'] or 
+                name == data['names']['actual'] or 
+                name in data['names']['aliases']):
+                return f"/static/emojis/{filename}"
+        return None
+
+    def replace_emoji_tags(self, text):
+        """Replace :emoji: tags with <img> elements"""
+        pattern = r':([^:\s]+):'
+        
+        def replace(match):
+            emoji_name = match.group(1)
+            emoji_path = self.get_emoji_path(emoji_name)
+            if emoji_path:
+                return f'<img src="{emoji_path}" alt=":{emoji_name}:" class="emoji">'
+            return match.group(0)
+        
+        return re.sub(pattern, replace, text)
+
+    def get_all_emojis(self):
+        """Return list of all emojis with their details"""
+        return [{
+            'path': f"/static/emojis/{filename}",
+            'names': data['names'],
+            'tags': data['tags']
+        } for filename, data in self.emojis.items()]
+
+    def search_emojis(self, query):
+        """Search emojis by name or tag"""
+        query = query.lower()
+        results = []
+        
+        for filename, data in self.emojis.items():
+            if (query in data['names']['used'].lower() or
+                query in data['names']['actual'].lower() or
+                any(query in alias.lower() for alias in data['names']['aliases']) or
+                any(query in tag.lower() for tag in data['tags'])):
+                
+                results.append({
+                    'path': f"/static/emojis/{filename}",
+                    'names': data['names'],
+                    'tags': data['tags']
+                })
+        
+        return results
+
+emoji_manager = EmojiManager()
