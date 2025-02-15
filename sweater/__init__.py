@@ -33,19 +33,14 @@ def allowed_file(filename):
            not any(c in filename for c in '\\/:*?"<>|')
 
 def is_safe_path(path):
-    """Check if the path is safe (no directory traversal)"""
     return not (('..' in path) or ('/' in path) or ('\\' in path))
 
 def sanitize_path(filename):
-    """Sanitize the custom path"""
-    # Remove any leading/trailing slashes and spaces
     filename = filename.strip('/ ').replace('\\', '/')
-    # Replace multiple slashes with single slash
     filename = re.sub(r'/+', '/', filename)
     return filename
 
 def get_file_type(filename):
-    """Determine if file is an image or other type"""
     ext = filename.rsplit('.', 1)[1].lower()
     return 'image' if ext in {'png', 'jpg', 'jpeg', 'gif'} else 'article' if ext == 'md' else 'file'
 
@@ -54,6 +49,7 @@ link_shortener = utils.LinkShortener()
 comments_manager = utils.Comments()
 python_executor = utils.PythonExecutor()
 git_manager = utils.GitManager()
+security_manager = utils.SecurityManager()
 
 @app.errorhandler(HTTPException)
 def error(e):
@@ -61,7 +57,6 @@ def error(e):
 
 @app.before_request
 def before_request():
-    # Add CORS protection
     if request.method == "OPTIONS":
         response = make_response()
         response.headers["Access-Control-Allow-Origin"] = "same-origin"
@@ -100,8 +95,17 @@ def add_comment(blog_name):
         content = request.form.get('content')
         if content:
             try:
-                # Apply emoji replacement before storing
-                # content = emoji_manager.replace_emoji_tags(content) #! TODO: make this only available to admin (me :droidangel:)
+                admin_token = request.cookies.get('admin_token')
+                is_admin = admin_token and security_manager.validate_session(admin_token, request.remote_addr)
+                
+                if is_admin:
+                    content = emoji_manager.replace_emoji_tags(content)
+                else:
+                    # Non-admin users - escape everything
+                    content = content.replace('<', '&lt;').replace('>', '&gt;')
+                    # Remove any emoji tags
+                    content = re.sub(r':[^:\s]+:', '', content)
+                
                 comments_manager.add_comment(blog_name, content, request.remote_addr)
             except ValueError as e:
                 flash(str(e), 'error')
@@ -193,7 +197,6 @@ def admin():
         'branch': git_manager.branch(),
         'commit': git_manager.commit(),
         'can_pull': git_manager.can_pull(),
-        'remote': git_manager.remote(), # unused
     }
 
     all_comments = comments_manager.get_all_comments()

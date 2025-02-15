@@ -19,7 +19,6 @@ import hmac
 fake = Faker('en_US')
 
 def get_key():
-    # Don't change directories - security risk
     key_path = os.path.join(os.path.dirname(__file__), 'key.txt')
     with open(key_path, 'r') as f:
         return f.read().strip()
@@ -349,7 +348,7 @@ class Comments:
         self.max_comments_per_period = 3
         self.blacklist_file = os.path.join(os.path.dirname(__file__), "static/ip_blacklist.json")
         self.blacklist = self._load_blacklist()
-        self.name_seeds = {}  # Add this line to store IP-based seeds
+        self.name_seeds = {}
 
     def _load_comments(self):
         if os.path.exists(self.comments_file):
@@ -387,9 +386,7 @@ class Comments:
         return False
 
     def name(self, ip):
-        # Use IP as seed to generate consistent names
         if ip not in self.name_seeds:
-            # Create a new Faker instance with IP as seed
             self.name_seeds[ip] = fake.random.randint(0, 2**32)
         temp_fake = Faker('en_US')
         temp_fake.seed_instance(self.name_seeds[ip])
@@ -397,23 +394,46 @@ class Comments:
 
     def _is_rate_limited(self, ip):
         now = time.time()
-        # Clean old entries
         self.rate_limits[ip] = [t for t in self.rate_limits[ip] 
                                if t > now - self.rate_limit_period]
-        # Check if too many comments
         if len(self.rate_limits[ip]) >= self.max_comments_per_period:
             return True
         self.rate_limits[ip].append(now)
         return False
 
+    def sanitize_html(self, content):
+        if '<img' not in content:
+            return content.replace('<', '&lt;').replace('>', '&gt;')
+        
+        parts = []
+        remaining = content
+        while '<img' in remaining:
+            before, rest = remaining.split('<img', 1)
+            if '>' in rest:
+                img_part, after = rest.split('>', 1)
+                if 'src="/static/emojis/' in img_part and \
+                   'class="emoji"' in img_part and \
+                   not any(bad in img_part.lower() for bad in ['onerror', 'onload', 'javascript:', 'data:']):
+                    parts.append(before.replace('<', '&lt;').replace('>', '&gt;'))
+                    parts.append(f'<img{img_part}>')
+                    remaining = after
+                else:
+                    parts.append(before.replace('<', '&lt;').replace('>', '&gt;'))
+                    parts.append('&lt;img' + img_part.replace('<', '&lt;').replace('>', '&gt;') + '&gt;')
+                    remaining = after
+            else:
+                remaining = before + '<img' + rest
+                break
+        
+        if remaining:
+            parts.append(remaining.replace('<', '&lt;').replace('>', '&gt;'))
+        
+        return ''.join(parts)
+
     def add_comment(self, post_id, content, ip):
-        # Sanitize inputs
         content = content.strip()
         if not content:
             raise ValueError("Empty comment")
-            
-        # Add HTML escaping
-        content = content.replace('<', '&lt;').replace('>', '&gt;')
         
         if self.is_ip_blocked(ip):
             raise ValueError("Your IP has been blocked from commenting")
@@ -427,7 +447,7 @@ class Comments:
             self.comments[post_id] = []
         
         self.comments[post_id].append({
-            'name': self.name(ip),  # Change this line to pass IP
+            'name': self.name(ip),
             'content': content,
             'date': datetime.now().isoformat().split(".")[0].replace("T", " "),
         })
@@ -524,7 +544,6 @@ class EmojiManager:
         return {}
 
     def get_emoji_path(self, name):
-        """Get emoji file path from name or alias"""
         for filename, data in self.emojis.items():
             if (name == data['names']['used'] or 
                 name == data['names']['actual'] or 
@@ -532,21 +551,57 @@ class EmojiManager:
                 return f"/static/emojis/{filename}"
         return None
 
+    def is_valid_emoji_path(self, path):
+        if not path.startswith('/static/emojis/'):
+            return False
+        
+        filename = path.split('/')[-1]
+        
+        return any(filename == f for f in self.emojis.keys())
+
+    def sanitize_html(self, content):
+        if '<img' not in content:
+            return content.replace('<', '&lt;').replace('>', '&gt;')
+        
+        parts = []
+        remaining = content
+        while '<img' in remaining:
+            before, rest = remaining.split('<img', 1)
+            if '>' in rest:
+                img_part, after = rest.split('>', 1)
+                src_match = re.search(r'src="([^"]+)"', img_part)
+                if src_match and self.is_valid_emoji_path(src_match.group(1)) and \
+                   'class="emoji"' in img_part and \
+                   not any(bad in img_part.lower() for bad in ['onerror', 'onload', 'javascript:', 'data:']):
+                    parts.append(before.replace('<', '&lt;').replace('>', '&gt;'))
+                    parts.append(f'<img{img_part}>')
+                    remaining = after
+                else:
+                    parts.append(before.replace('<', '&lt;').replace('>', '&gt;'))
+                    parts.append('&lt;img' + img_part.replace('<', '&lt;').replace('>', '&gt;') + '&gt;')
+                    remaining = after
+            else:
+                remaining = before + '<img' + rest
+                break
+        
+        if remaining:
+            parts.append(remaining.replace('<', '&lt;').replace('>', '&gt;'))
+        
+        return ''.join(parts)
+
     def replace_emoji_tags(self, text):
-        """Replace :emoji: tags with <img> elements"""
         pattern = r':([^:\s]+):'
         
         def replace(match):
             emoji_name = match.group(1)
             emoji_path = self.get_emoji_path(emoji_name)
-            if emoji_path:
+            if emoji_path and self.is_valid_emoji_path(emoji_path):
                 return f'<img src="{emoji_path}" alt=":{emoji_name}:" class="emoji">'
             return match.group(0)
         
         return re.sub(pattern, replace, text)
 
     def get_all_emojis(self):
-        """Return list of all emojis with their details"""
         return [{
             'path': f"/static/emojis/{filename}",
             'names': data['names'],
@@ -554,7 +609,6 @@ class EmojiManager:
         } for filename, data in self.emojis.items()]
 
     def search_emojis(self, query):
-        """Search emojis by name or tag"""
         query = query.lower()
         results = []
         
