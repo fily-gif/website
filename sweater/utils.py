@@ -54,6 +54,11 @@ class SecurityManager:
     def record_attempt(self, ip):
         self.login_attempts[ip].append(time.time())
 
+    def get_attempts(self, ip = None):
+        if ip:
+            return len(self.login_attempts.get(ip, []))
+        return {ip: len(attempts) for ip, attempts in self.login_attempts.items()}
+
     def validate_session(self, token, ip):
         if not token:
             return False
@@ -342,6 +347,7 @@ class Comments:
         self.blacklist_file = os.path.join(os.path.dirname(__file__), "static/ip_blacklist.json")
         self.blacklist = self._load_blacklist()
         self.name_seeds = {}
+        self.random_hex = ''.join(rng.choices(string.hexdigits, k=16))
 
     def _load_comments(self):
         if os.path.exists(self.comments_file):
@@ -380,10 +386,9 @@ class Comments:
 
     def name(self, ip):
         if ip not in self.name_seeds:
-            self.name_seeds[ip] = fake.random.randint(0, 2**32)
-        temp_fake = Faker('en_US')
-        temp_fake.seed_instance(self.name_seeds[ip])
-        return temp_fake.name()
+            self.name_seeds[ip] = rng.randint(0, 2**32)
+        rng.seed(self.name_seeds[ip])
+        return 'Anon-' + ''.join(rng.choices(string.hexdigits, k=6))
 
     def _is_rate_limited(self, ip):
         now = time.time()

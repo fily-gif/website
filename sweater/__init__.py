@@ -15,12 +15,12 @@ app = Flask(__name__,
            template_folder=template_dir,
            static_folder=static_dir)
 app.config['SECRET_KEY'] = os.urandom(32)  # Required for CSRF
+app.config['MAX_CONTENT_LENGTH'] = 250 * 1024 * 1024
 csrf = CSRFProtect(app)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'zip', 'md'}
 
-# Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Add CSRF protection to all POST routes
@@ -369,6 +369,7 @@ def view_files():
     return render_template('view_files.html', files=files, datetime=datetime)
 
 @app.route('/api/emojis', methods=['GET'])
+@utils.requires_auth
 def list_emojis():
     query = request.args.get('q', '').strip()
     if query:
