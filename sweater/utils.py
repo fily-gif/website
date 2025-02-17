@@ -104,17 +104,22 @@ class GitManager:
     @staticmethod
     def git_pull():
         try:
-            result = subprocess.run('./pull.sh', 
+            pardir = os.path.dirname(__file__)
+            print(pardir)
+            result = subprocess.run(['bash', '-c', './pull.sh'], 
                         check=True, 
                         capture_output=True,
-                        cwd=os.pardir.dirname(__file__))
+                        cwd=os.path.dirname(pardir))
             output = result.stdout.decode().strip()
+            print(f"{output} {datetime.now()}")
             if "Already up to date" in output:
                 return {'status': 'success', 'message': 'Already up to date'}
             return {'status': 'success', 'message': output.split('\n')[-1]}
         except subprocess.CalledProcessError as e:
+            print(e)
             return {'status': 'error', 'message': str(e)}
         except Exception as e:
+            print(e)
             return {'status': 'error', 'message': str(e)}
 
     @staticmethod

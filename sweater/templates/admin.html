@@ -27,7 +27,16 @@
         <p>Branch: {{ git.branch['message'] }}</p>
         <p>Commit: {{ git.commit['message'][:7] }}</p>
         <p>To pull: {{ git.can_pull['message'] }}</p>
-
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if 'Git pull:' in message %}
+                        <p class="flash-message {{ category }}">{{ message }}</p>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 </section>
 
 <section class="admin-comments">
