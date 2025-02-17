@@ -104,35 +104,23 @@ class GitManager:
     @staticmethod
     def git_pull():
         try:
-            result = subprocess.run(['git', 'pull'], 
+            result = subprocess.run('./pull.sh', 
                         check=True, 
                         capture_output=True,
-                        cwd=os.path.dirname(__file__))
+                        cwd=os.pardir.dirname(__file__))
             output = result.stdout.decode().strip()
             if "Already up to date" in output:
                 return {'status': 'success', 'message': 'Already up to date'}
             return {'status': 'success', 'message': output.split('\n')[-1]}
         except subprocess.CalledProcessError as e:
             return {'status': 'error', 'message': str(e)}
+        except Exception as e:
+            return {'status': 'error', 'message': str(e)}
 
     @staticmethod
     def branch():
         try:
             result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
-                        check=True, 
-                        capture_output=True,
-                        cwd=os.path.dirname(__file__))
-            return {
-                'status': 'success',
-                'message': result.stdout.decode().strip()
-            }
-        except subprocess.CalledProcessError as e:
-            return {'status': 'error', 'message': str(e)}
-
-    @staticmethod
-    def remote():
-        try:
-            result = subprocess.run(['git', 'config', '--get', 'remote.origin.url'], 
                         check=True, 
                         capture_output=True,
                         cwd=os.path.dirname(__file__))
